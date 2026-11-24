@@ -6,10 +6,8 @@ workflows:
     integrations:
       app_store_connect: bemiyonrav
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: tj.bemiyonrav.app
       vars:
+        BUNDLE_ID: tj.bemiyonrav.app
         XCODE_WORKSPACE: BeMienrav.xcworkspace
         XCODE_SCHEME: BeMienrav
       node: v22.13.1
@@ -22,8 +20,12 @@ workflows:
         script: npx expo prebuild --platform ios --no-install
       - name: Install CocoaPods
         script: cd ios && pod install
-      - name: Apply the signing profile
-        script: xcode-project use-profiles
+      - name: Create the App Store certificate and profile
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
       - name: Set the build number
         script: |
           cd "$CM_BUILD_DIR/ios"
