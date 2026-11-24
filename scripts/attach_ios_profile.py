@@ -62,3 +62,23 @@ if "PROVISIONING_PROFILE_SPECIFIER" not in updated:
 updated = updated.replace("ProvisioningStyle = Automatic;", "ProvisioningStyle = Manual;")
 pbx.write_text(updated)
 print("Attached profile to", pbx)
+
+export_path = pathlib.Path("/Users/builder/export_options.plist")
+if not export_path.parent.is_dir():
+    export_path = pathlib.Path.home() / "export_options.plist"
+export_path.write_text(
+    "\n".join([
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
+        '<plist version="1.0"><dict>',
+        "<key>method</key><string>app-store</string>",
+        "<key>signingStyle</key><string>manual</string>",
+        f"<key>teamID</key><string>{team}</string>",
+        "<key>uploadSymbols</key><true/>",
+        "<key>provisioningProfiles</key><dict>",
+        f"<key>{bundle}</key><string>{name}</string>",
+        "</dict></dict></plist>",
+        "",
+    ])
+)
+print("Wrote", export_path)
