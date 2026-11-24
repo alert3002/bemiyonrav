@@ -6,6 +6,8 @@ workflows:
     integrations:
       app_store_connect: bemiyonrav
     environment:
+      groups:
+        - ios_credentials
       vars:
         BUNDLE_ID: tj.bemiyonrav.app
         XCODE_WORKSPACE: BeMienrav.xcworkspace
@@ -23,7 +25,10 @@ workflows:
       - name: Create the App Store certificate and profile
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --certificate-key="@env:CERTIFICATE_PRIVATE_KEY" \
+            --create
           keychain add-certificates
           python3 scripts/attach_ios_profile.py
       - name: Set the build number
