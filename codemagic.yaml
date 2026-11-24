@@ -25,7 +25,8 @@ workflows:
           keychain initialize
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
-          xcode-project use-profiles
+          xcode-project use-profiles --code-signing-setup-verbose-logging || true
+          python3 scripts/attach_ios_profile.py
       - name: Set the build number
         script: |
           cd "$CM_BUILD_DIR/ios"
