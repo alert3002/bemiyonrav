@@ -1,4 +1,3 @@
-import glob
 import os
 import pathlib
 import plistlib
@@ -7,14 +6,24 @@ import subprocess
 import sys
 
 bundle = os.environ["BUNDLE_ID"]
-folder = os.path.expanduser("~/Library/MobileDevice/Provisioning Profiles")
+home = pathlib.Path.home()
+folders = [
+    home / "Library/MobileDevice/Provisioning Profiles",
+    home / "Library/Developer/Xcode/UserData/Provisioning Profiles",
+]
 chosen = None
-for profile in glob.glob(folder + "/*.mobileprovision"):
-    raw = subprocess.check_output(["security", "cms", "-D", "-i", profile])
-    data = plistlib.loads(raw)
-    app_id = data.get("Entitlements", {}).get("application-identifier", "")
-    if app_id.endswith("." + bundle):
-        chosen = data
+for folder in folders:
+    for pattern in ("*.mobileprovision", "*.provisionprofile"):
+        for profile in folder.glob(pattern):
+            raw = subprocess.check_output(["security", "cms", "-D", "-i", str(profile)])
+            data = plistlib.loads(raw)
+            app_id = data.get("Entitlements", {}).get("application-identifier", "")
+            if app_id.endswith("." + bundle):
+                chosen = data
+                break
+        if chosen:
+            break
+    if chosen:
         break
 if chosen is None:
     sys.exit("App Store profile for " + bundle + " was not found")
