@@ -25,9 +25,10 @@ workflows:
       - name: Create the App Store certificate and profile
         script: |
           keychain initialize
+          python3 scripts/prepare_certificate_key.py
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
-            --certificate-key="@env:CERTIFICATE_PRIVATE_KEY" \
+            --certificate-key="@file:$CM_BUILD_DIR/certificate_private_key.pem" \
             --create
           keychain add-certificates
           python3 scripts/attach_ios_profile.py
